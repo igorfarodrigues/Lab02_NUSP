@@ -1,0 +1,17 @@
+# Arquivo de configuração do DBT para conexão com o banco PostgreSQL
+# ATENÇÃO: Este arquivo deve ser colocado em ~/.dbt/profiles.yml na sua máquina local
+# NÃO versione este arquivo com credenciais reais!
+
+dbt_project:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: postgres
+      password: postgres
+      port: 5432
+      dbname: dbt_lab2
+      schema: dbt_schema
+      threads: 4
+      keepalives_idle: 0
