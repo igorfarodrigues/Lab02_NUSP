@@ -1,0 +1,128 @@
+version: 2
+
+sources:
+  - name: booking_sources
+    database: dbt_lab2
+    schema: bookings
+    description: "Camada Raw (bruta) do sistema de aviação, contendo reservas, tickets e voos."
+
+    tables:
+      # --- Tabela de Reservas ---
+      - name: bookings
+        description: "Registros de reservas realizadas no sistema."
+        columns:
+          - name: book_ref
+            description: "Identificador alfanumérico único da reserva."
+            tests:
+              - unique
+              - not_null
+          - name: book_date
+            description: "Data em que a reserva foi confirmada."
+            tests:
+              - not_null
+          - name: total_amount
+            description: "Valor total da reserva em reais."
+            tests:
+              - not_null
+
+      # --- Tabela de Bilhetes (Tickets) ---
+      - name: tickets
+        description: "Bilhetes individuais emitidos para passageiros vinculados a uma reserva."
+        columns:
+          - name: ticket_no
+            description: "Número do bilhete (Chave Primária)."
+            tests:
+              - unique
+              - not_null
+          - name: passenger_name
+            description: "Nome completo do passageiro conforme documento."
+            tests:
+              - not_null
+          - name: book_ref
+            description: "Chave estrangeira vinculando o bilhete à reserva."
+            tests:
+              - not_null
+              - relationships:
+                  to: source('booking_sources', 'bookings')
+                  field: book_ref
+
+      # --- Tabela de Segmentos de Voo (Ticket Flights) ---
+      - name: ticket_flights
+        description: "Relacionamento muitos-para-muitos entre tickets e voos."
+        columns:
+          - name: ticket_no
+            description: "Número do bilhete vinculado ao voo."
+            tests:
+              - not_null
+              - relationships:
+                  to: source('booking_sources', 'tickets')
+                  field: ticket_no
+          - name: flight_id
+            description: "ID do voo associado ao bilhete."
+            tests:
+              - not_null
+              - relationships:
+                  to: source('booking_sources', 'flights')
+                  field: flight_id
+          - name: fare_conditions
+            description: "Classe da passagem (Economy, Comfort, Business)."
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['Economy', 'Comfort', 'Business']
+          - name: amount
+            description: "Valor da passagem neste segmento de voo."
+            tests:
+              - not_null
+
+      # --- Tabela de Voos ---
+      - name: flights
+        description: "Cronograma de voos com status, horários e aeronaves."
+        columns:
+          - name: flight_id
+            description: "Identificador único do voo."
+            tests:
+              - unique
+              - not_null
+          - name: flight_no
+            description: "Código do voo (ex: PG0013)."
+            tests:
+              - not_null
+          - name: status
+            description: "Status do voo (Scheduled, On Time, Delayed, Departed, Arrived, Cancelled)."
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['Scheduled', 'On Time', 'Delayed', 'Departed', 'Arrived', 'Cancelled']
+
+      # --- Tabela de Aeroportos ---
+      - name: airports
+        description: "Cadastro de aeroportos (Origem/Destino)."
+        columns:
+          - name: airport_code
+            description: "Código IATA de 3 letras (ex: GRU, GIG)."
+            tests:
+              - unique
+              - not_null
+          - name: airport_name
+            description: "Nome completo do aeroporto."
+            tests:
+              - not_null
+          - name: city
+            description: "Cidade onde o aeroporto está localizado."
+            tests:
+              - not_null
+
+      # --- Tabela de Aeronaves ---
+      - name: aircrafts
+        description: "Cadastro de aeronaves disponíveis na frota."
+        columns:
+          - name: aircraft_code
+            description: "Código identificador da aeronave."
+            tests:
+              - unique
+              - not_null
+          - name: model
+            description: "Modelo da aeronave."
+            tests:
+              - not_null

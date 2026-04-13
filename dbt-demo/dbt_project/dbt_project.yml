@@ -1,0 +1,29 @@
+version: '1.0.0'
+name: 'dbt_project'
+
+profile: 'dbt_project'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  dbt_project:
+
+    # 1. Camada Staging: Materializada como VIEW (Economia de custos)
+    staging:
+      +materialized: view
+      +schema: staging
+
+    # 2. Camada Marts: Tabelas Finais (TABLE para performance de BI)
+    marts:
+      +materialized: table
+      +schema: analytics
+      +tags: ["gold", "bi_ready"]

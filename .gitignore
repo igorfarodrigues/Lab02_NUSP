@@ -1,0 +1,19 @@
+# DBT build artifacts
+dbt-demo/dbt_project/target/
+dbt-demo/dbt_project/dbt_packages/
+dbt-demo/dbt_project/logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# DBT profiles (contains credentials)
+profiles.yml
+
+# OS
+.DS_Store
+Thumbs.db

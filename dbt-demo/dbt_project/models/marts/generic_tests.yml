@@ -1,0 +1,109 @@
+version: 2
+
+models:
+  - name: fact_ticket_flight
+    description: "Tabela fato que consolida as vendas de passagens por segmento de voo."
+    columns:
+      # 1. Chave Composta (Ticket + Voo) deve ser única
+      - name: ticket_no
+        description: "Número do bilhete."
+        tests:
+          - not_null
+          - relationships:
+              to: source('booking_sources', 'tickets')
+              field: ticket_no
+
+      - name: flight_id
+        description: "Identificador do voo."
+        tests:
+          - not_null
+          - relationships:
+              to: source('booking_sources', 'flights')
+              field: flight_id
+
+      - name: book_ref
+        description: "Referência da reserva associada ao bilhete."
+        tests:
+          - not_null
+
+      - name: aircraft_code
+        description: "Código da aeronave utilizada no voo."
+        tests:
+          - not_null
+
+      # 2. Validação de Regra de Negócio (O valor da passagem não pode ser negativo)
+      - name: amount
+        description: "Valor pago pelo segmento de voo."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      # 3. Validação de Classe de Viagem
+      - name: fare_conditions
+        description: "Classe da passagem (Economy, Comfort ou Business)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Economy', 'Comfort', 'Business']
+              quote: true
+
+      - name: scheduled_departure
+        description: "Horário planejado de partida do voo."
+        tests:
+          - not_null
+
+      - name: scheduled_arrival
+        description: "Horário planejado de chegada do voo."
+        tests:
+          - not_null
+
+      - name: scheduled_duration_minutes
+        description: "Duração planejada do voo em minutos (calculada pela macro get_flight_duration)."
+
+      - name: actual_duration_minutes
+        description: "Duração real do voo em minutos (pode ser NULL se voo não realizado)."
+
+  - name: dim_airports
+    description: "Dimensão de aeroportos com contagem de operações (pousos e decolagens)."
+    columns:
+      - name: airport_code
+        description: "Código IATA do aeroporto (Chave Primária)."
+        tests:
+          - unique
+          - not_null
+
+      - name: airport_name
+        description: "Nome completo do aeroporto."
+        tests:
+          - not_null
+
+      - name: city
+        description: "Cidade do aeroporto."
+        tests:
+          - not_null
+
+      - name: total_departures
+        description: "Total de voos que partiram deste aeroporto."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: total_arrivals
+        description: "Total de voos que chegaram neste aeroporto."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: total_operations
+        description: "Total de operações (partidas + chegadas) no aeroporto."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
