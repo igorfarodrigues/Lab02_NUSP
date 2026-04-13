@@ -310,12 +310,14 @@ Este comando compila o projeto e gera o arquivo `target/catalog.json` com os met
 ### 7.2 Visualizar a documentação
 
 ```bash
+# Porta padrão: 8080
 dbt docs serve
-# ou em uma porta específica:
+
+# Ou em uma porta alternativa:
 dbt docs serve --port 8001
 ```
 
-Acesse no navegador: `http://localhost:8080`
+Acesse no navegador: `http://localhost:8080` (ou `http://localhost:8001` se usar `--port 8001`)
 
 A documentação gerada inclui:
 - **Catálogo de modelos e sources** com descrições e metadados
